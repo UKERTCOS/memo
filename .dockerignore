@@ -1,8 +1,7 @@
-Dockerfile
-docker-compose.yml
-requirements.txt
-venv/
+src/__pycache__/
 .venv/
+venv/
+README
 src/_pycache_
 src/utils/_pycache_/
 src/utils/controller_example.py

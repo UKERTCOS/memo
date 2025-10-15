@@ -1,0 +1,17 @@
+2025-10-15 12:34:32 - error - ERROR - [memo.py:56] - 创建备忘录失败: 'CreateMemoRequest' object has no attribute 'title'
+Traceback (most recent call last):
+  File "/memo/src/controller/memo.py", line 52, in Create_memo
+    business_logger.info(f"开始创建备忘录: {create_body.title}")
+                                            ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pydantic/main.py", line 1026, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'CreateMemoRequest' object has no attribute 'title'
+2025-10-15 12:34:32 - error - ERROR - [main.py:57] - Traceback (most recent call last):
+  File "/memo/src/controller/memo.py", line 52, in Create_memo
+    business_logger.info(f"开始创建备忘录: {create_body.title}")
+                                            ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pydantic/main.py", line 1026, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'CreateMemoRequest' object has no attribute 'title'
+
+
