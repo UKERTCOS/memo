@@ -24,20 +24,17 @@ from src.controller import memo
 from src.model.resp import ErrResponse
 from src.storage.db import Base, engine
 
-from src.utils.logger import get_error_logger, get_access_logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """startup event"""
     # 初始化日志
     # 初始化数据库
-    #init_logger()
+    init_logger()
     await init_database()
 
     yield
 
-errorlogger = get_error_logger()
-accesslogger = get_access_logger()
 
 app = FastAPI(lifespan=lifespan)
 @app.get("/")
@@ -75,19 +72,58 @@ async def init_database():
         await conn.run_sync(Base.metadata.create_all)
 
 
-# 注释的原有 logger
-'''accesslogger = logging.getLogger("uvicorn.access")
-errorlogger = logging.getLogger()
+
+accesslogger = logging.getLogger("uvicorn.access")
+errorlogger = logging.getLogger("memo.error")
 
 
 def init_logger():
-    accesslogger = logging.getLogger("uvicorn.access")
-    handler = logging.handlers.RotatingFileHandler(settings.ACCESS_LOG, mode="a", maxBytes=1024 * 1024, backupCount=10)
-    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-    accesslogger.addHandler(handler)
-    handler2 = logging.handlers.RotatingFileHandler(settings.ERROR_LOG, mode="a", maxBytes=1024 * 1024, backupCount=10)
-    handler2.setFormatter(logging.Formatter("%(asctime)s - %(name)s -%(levelname)s - %(message)s"))
-    errorlogger.addHandler(handler2)'''
+    access_logger = logging.getLogger("uvicorn.access")
+    access_logger.setLevel(logging.INFO)
+    access_logger.propagate = False
+
+    # Ensure we write structured error details to a rotating file so production errors persist.
+    error_logger = logging.getLogger("memo.error")
+    error_logger.setLevel(logging.INFO)
+    error_logger.propagate = False
+
+    def _ensure_directory(path: str) -> None:
+        directory = os.path.dirname(os.path.abspath(path))
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+
+    def _attach_rotating_handler(logger: logging.Logger, file_path: str, formatter: logging.Formatter) -> None:
+        _ensure_directory(file_path)
+        normalized_path = os.path.abspath(file_path)
+        existing = [
+            h
+            for h in logger.handlers
+            if isinstance(h, logging.handlers.RotatingFileHandler)
+            and os.path.abspath(getattr(h, "baseFilename", "")) == normalized_path
+        ]
+        if existing:
+            return
+        handler = logging.handlers.RotatingFileHandler(
+            normalized_path,
+            mode="a",
+            maxBytes=1024 * 1024,
+            backupCount=10,
+            encoding="utf-8",
+        )
+        handler.setLevel(logger.level)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    access_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    error_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+    _attach_rotating_handler(access_logger, settings.ACCESS_LOG, access_formatter)
+    _attach_rotating_handler(error_logger, settings.ERROR_LOG, error_formatter)
+
+    uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    uvicorn_error_logger.setLevel(logging.INFO)
+    uvicorn_error_logger.propagate = False
+    _attach_rotating_handler(uvicorn_error_logger, settings.ERROR_LOG, error_formatter)
 
 
 # 添加中间件

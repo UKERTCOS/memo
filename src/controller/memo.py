@@ -7,14 +7,7 @@ from src.model import req, resp
 from src.service import memo_util
 from src.storage.db import get_db
 
-# 添加日志导入
-from src.utils.logger import get_error_logger, get_business_logger
-
 memoRouter = APIRouter(prefix="/api/memo", tags=["memo"])
-
-# 创建日志记录器
-error_logger = get_error_logger()
-business_logger = get_business_logger()
 
 @memoRouter.get("/ping")
 def pong():
@@ -27,11 +20,8 @@ def pong():
 async def Get_all(request: Request, response: Response, session: AsyncSession = Depends(get_db)):
     """获取备忘录"""
     try:
-        business_logger.info("开始获取所有备忘录")
         memos_row = await memo_util.find_memo_all(session)
-        business_logger.info(f"成功获取 {len(memos_row)} 条备忘录")
-    except Exception as e:
-        error_logger.error(f"获取备忘录失败: {str(e)}", exc_info=True)
+    except Exception:
         raise resp.ErrResponse(Error.DbErr, "fail to get memo:Unkown Error Happened", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -49,11 +39,8 @@ async def Create_memo(request: Request, response: Response, create_body: req.Cre
     """创建备忘录"""
 
     try:
-        business_logger.info(f"开始创建备忘录: {create_body.title}")
         memo = await memo_util.create_memo(create_body, sess)
-        business_logger.info(f"成功创建备忘录: id={memo.id}")
-    except Exception as e:
-        error_logger.error(f"创建备忘录失败: {str(e)}", exc_info=True)
+    except Exception:
         raise resp.ErrResponse(Error.DbErr, "fail to create memo:Unkown Error Happened", status.HTTP_500_INTERNAL_SERVER_ERROR)
     return resp.APIResponse(errCode=Error.NoError)
 

@@ -4,11 +4,3 @@ requirements.txt
 venv/
 .venv/
 src/_pycache_
-src/utils/_pycache_/
-src/utils/controller_example.py
-src/utils/logger_example.py
-src/utils/LOGGER_README.md
-src/utils/main_integration.py
-src/utils/QUICK_START.md
-src/utils/SUMMARY.md
-src/utils/USAGE_GUIDE.md
