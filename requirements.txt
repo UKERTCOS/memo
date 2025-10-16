@@ -1,0 +1,15 @@
+auto_mix_prep
+aiomysql
+fastapi
+pydantic
+pydantic_settings
+python-dotenv
+slowapi
+SQLAlchemy
+starlette
+uvicorn
+pymysql
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+cryptography
